@@ -42,22 +42,22 @@ except FileNotFoundError:
   print("Dataset cannot be found")
 
 # If importing data from Google Colab
-try:
-  file_loc = "/content/sample_data"
-
-  df = pd.read_excel(f"{drive_loc}/ML_Project.xlsx")
-  print("XLSX found")
-  df.to_csv(f"{drive_loc}/ML_Project.csv", index=False)
-  print("XLSX converted to CSV")
-except FileNotFoundError:
-  print("Dataset cannot be found")
+#try:
+#  file_loc = "/content/sample_data"
+#
+#  df = pd.read_excel(f"{drive_loc}/ML_Project.xlsx")
+#  print("XLSX found")
+#  df.to_csv(f"{drive_loc}/ML_Project.csv", index=False)
+#  print("XLSX converted to CSV")
+#except FileNotFoundError:
+#  print("Dataset cannot be found")
 
 # Calling all functions
-# Biplot function with k-mean labels
+# Biplot function with KMean labels
 def biplot_clusters(PCs,coef,klabels,labels=None):
     plt.figure(figsize=(10,10))
-    xs = PCs[:,0] # PC1
-    ys = PCs[:,1] # PC2
+    xs = PCs[:,0]
+    ys = PCs[:,1]
     coef = np.transpose(coef)
     n = coef.shape[0]
     scalex = 1.0/(xs.max() - xs.min())
@@ -111,6 +111,12 @@ df.head()
 # Run a general correlation matrix to understand if any variables are influencing each other
 corr = df.corr()
 corr.style.background_gradient(cmap="coolwarm", axis=None, vmin=0.50) # shows colormap of values higher than 0.50. Can change the cutoff value with 'vmin'
+
+# Count values in each column
+for col in df.columns:
+  print(f"Column: {col}")
+  print(df[col].value_counts())
+  print("-" * 20)
 
 """# Geological Setting Variable Grouping"""
 
@@ -172,12 +178,12 @@ new_geo_set_df["geo_set"] = geo_set_pca.fit_transform(new_norm_geo_set_df)
 print(new_geo_set_df.shape)
 
 # Create new xaxis tick marks for charts
-geo_set_values = sorted(new_geo_set_df['geo_set'].unique())
-geo_set_values_r = []
+ngeo_set_values = sorted(new_geo_set_df['geo_set'].unique())
+ngeo_set_values_r = []
 
-for i in geo_set_values:
+for i in ngeo_set_values:
   num = round(i, 2)
-  geo_set_values_r.append(num)
+  ngeo_set_values_r.append(num)
 
 new_geo_set_df
 
@@ -194,7 +200,7 @@ for key, value in list(var_dict.items())[3:]:
   sct = plt.scatter(new_geo_set_df['geo_set'], new_clean_df['TOC'],
                     c=new_clean_df[f"{key}"],
                     s=1)
-  ax1.set_xticks(geo_set_values_r)
+  ax1.set_xticks(ngeo_set_values_r)
   ax1.legend(handles=sct.legend_elements()[0],
              labels=var_dict.get(f"{key}"))
   plt.tight_layout()
@@ -304,7 +310,7 @@ test_pct = 100*x_test.shape[0]/features_scaled.shape[0]
 print(f'Training data is {train_pct:.3}% of the total data. \nTest data makes up the remaining {test_pct:0.3}%.')
 
 # Logistic regression on training data with L2 regularization
-log_reg = LogisticRegression(class_weight="balanced", penalty='l2', C=0.01) # Use of balanced class weight to minimize imbalance bias. 'C' determined from GridSearchCV function
+log_reg = LogisticRegression(class_weight="balanced", penalty='l2', C=0.001) # Use of balanced class weight to minimize imbalance bias. 'C' determined from GridSearchCV function
 log_reg.fit(x_train, y_train)
 
 print(f"Intercept: {log_reg.intercept_} \nCoefficients: {log_reg.coef_} \nTraining score: {log_reg.score(x_train, y_train)*100}%")
